@@ -71,12 +71,6 @@ async function mapFileToItem(config: Config, file: any, owner: string, repo: str
 }
 
 
-/**
- * Get all Markdown files from all repositories recursively.
- * @param config - The configuration object containing connector details
- */
-// ...existing code...
-
 export async function* getAllMdFiles(config: Config): AsyncGenerator<Item> {
   const repos = config.connector.repos.split(",");
   
@@ -84,7 +78,7 @@ export async function* getAllMdFiles(config: Config): AsyncGenerator<Item> {
     config.context.log(`Fetching readme.md files from agent-instructions folders: ${repo}`);
     const [owner, repoName] = repo.trim().split("/");
     
-    const fetchUrl = `https://api.github.com/repos/rabwill/copilot-prompts/contents/samples/agent-instructions`;
+    const fetchUrl = `https://api.github.com/repos/${repo}/contents/samples/agent-instructions`;
     
     try {
       const response = await fetchRepoContents(config, fetchUrl, repo);
@@ -103,7 +97,7 @@ export async function* getAllMdFiles(config: Config): AsyncGenerator<Item> {
           for (const dir of directories) {
             try {
               // Fetch readme.md directly from each agent folder
-               const readmeUrl = `https://api.github.com/repos/rabwill/copilot-prompts/contents/${dir.path}/readme.md`;
+               const readmeUrl = `https://api.github.com/repos/${repo}/contents/${dir.path}/readme.md`;
          try {
                 const readmeResponse = await fetchRepoContents(config, readmeUrl, repo);
                 const readmeContent = await readmeResponse.json();
@@ -118,7 +112,7 @@ export async function* getAllMdFiles(config: Config): AsyncGenerator<Item> {
               } catch (readmeError) {
                  config.context.log(`No readme found in ${dir.path} with issue 1: ${readmeError.message}`);
                 // Try with uppercase README.md if lowercase fails
-               const uppercaseReadmeUrl = `https://api.github.com/repos/rabwill/copilot-prompts/contents/${dir.path}/README.md`;
+               const uppercaseReadmeUrl = `https://api.github.com/repos/${repo}/contents/${dir.path}/README.md`;
              try {
                   const readmeResponse = await fetchRepoContents(config, uppercaseReadmeUrl, repo);
                   const readmeContent = await readmeResponse.json();
