@@ -1,15 +1,14 @@
-# Copilot connector Template
+# Automating File Ingestion from GitHub repo to M365 Using Copilot Connector
 
 ## Summary
 
-This sample project uses Microsoft 365 Agents Toolkit for Visual Studio Code to simplify the process of creating a [Microsoft Copilot connector](https://learn.microsoft.com/graph/connecting-external-content-connectors-overview) that ingests data from the GitHub issues API to Microsoft Graph. It provides an end to end opinionated starting point of creating the connector, ingesting content and refreshing the ingested content.
+This sample project uses Microsoft 365 Agents Toolkit for Visual Studio Code to simplify the process of creating a [Microsoft Copilot connector](https://learn.microsoft.com/graph/connecting-external-content-connectors-overview) that ingests data from the GitHub folder files (readme files) to Microsoft Graph. It provides an end to end opinionated starting point of creating the connector, ingesting content and refreshing the ingested content.
 
-![External content in Microsoft 365 Copilot](./assets/copilot-results.png)
+![External content from prompt library in Microsoft 365 Copilot](./assets/prompt-library-connector.gif)
 
 ## Features
 
-This template shows how to ingest data from a custom API into your Microsoft 365 tenant.
-It uses the GitHub API to provide a sample use case and is intended to be a starting point to help you bring your data in M365 Copilot and then customize it to your needs and LoB (Line of Business) APIs.
+This template shows how to ingest files from a GitHub Repo into your Microsoft 365 tenant.
 
 The template illustrates the following concepts:
 
@@ -26,6 +25,7 @@ The template illustrates the following concepts:
 - [Sébastien Levert](https://github.com/sebastienlevert)
 - [Luis Javier Fernández](https://github.com/luisjfdez)
 - [Rachit Malik](https://github.com/RachitMalik12)
+- [Rabia Williams](https://github.com/rabwill)
 
 ## Version History
 
@@ -34,6 +34,7 @@ Version|Date|Comments
 1.0|December 03, 2024|Initial release
 1.1|April 15, 2025|Additional comments and minor improvements
 1.2|April 21, 2025|Rebrand and remove unecessary steps 
+2.0|April 21, 2025|Added functions to get .md files from GitHub repo folder
 
 ## Prerequisites
 
@@ -54,9 +55,9 @@ Version|Date|Comments
 - In the web browser navigate to the [Search & Intelligence](https://admin.microsoft.com/#/MicrosoftSearch/Connectors) area in the Microsoft 365 Admin Center
 - A table will display available connections. Locate the **GitHub Issues** connection. In the **Required actions** column, select the link to **Include Connector Results** and confirm the prompt
 - Navigate to [Microsoft 365 Copilot](https://m365.cloud.microsoft/chat)
-- Using the search box on top, search for: `Summarize the latest GitHub issues`. You should see the following result:
+- Using the search box on top, search for: `Tell me about agent instructions based on samples available`. You should see the following result:
 
-![External content in Microsoft 365 Copilot](assets/copilot-results.png)
+![External content from prompt library in Microsoft 365 Copilot](./assets/prompt-library-connector.gif)
 
 > [!NOTE]  
 > It can take a moment for the results to appear. If you don't see the results immediately, wait a few moments and try again.
