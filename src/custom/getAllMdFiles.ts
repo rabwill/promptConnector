@@ -98,12 +98,12 @@ async function tryFetchReadme(config: Config, repo: string, dirPath: string, own
 
 export async function* getAllMdFiles(config: Config): AsyncGenerator<Item> {
   const repos = config.connector.repos.split(",");
-
+  const targetFolder = "samples/agent-instructions"; //todo make this configurable
   for (const repo of repos) {
     config.context.log(`Fetching readme.md files from agent-instructions folders: ${repo}`);
     const [owner, repoName] = repo.trim().split("/");
 
-    const fetchUrl = `https://api.github.com/repos/${repo}/contents/samples/agent-instructions`;
+    const fetchUrl = `https://api.github.com/repos/${repo}/contents/${targetFolder}`;
 
     try {
       const response = await fetchRepoContents(config, fetchUrl, repo);
