@@ -16,11 +16,12 @@ import { Config } from "../models/Config";
  * @returns An async generator that yields items from the repository.
  */
 export async function* getAllItems(config: Config, since?: Date) {
+  //this is default placeholder implementation to fetch issues from a repository,uncomment to use it
   // for await (const item of getAllItemsFromAPI(config, since)) {
   //   yield item;
   // }
   for await (const item of getAllMdFiles(config)) {
-  console.log(`Found Markdown file: ${item.title}`);
+  console.log(`Found readme files with agent instructions file: ${item.title}`);
     yield item;
 }
 }

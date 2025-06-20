@@ -53,7 +53,7 @@ async function cleanMarkdownContent(rawContent: string): Promise<string> {
 async function mapFileToItem(config: Config, file: any, owner: string, repo: string): Promise<Item> {
   const rawContent = await Buffer.from(file.content, 'base64').toString('utf-8');
   const cleanedContent = await cleanMarkdownContent(rawContent);
-  
+
   return {
     id: file.sha,
     issueNumber: file.path,
@@ -69,21 +69,46 @@ async function mapFileToItem(config: Config, file: any, owner: string, repo: str
     url: file.html_url,
   };
 }
+async function tryFetchReadme(config: Config, repo: string, dirPath: string, owner: string, repoName: string): Promise<Item | null> {
+  // Array of possible readme filenames
+  const readmeVariants = ['README.md', 'readme.md', 'Readme.md'];
 
+  for (const variant of readmeVariants) {
+    const readmeUrl = `https://api.github.com/repos/${repo}/contents/${dirPath}/${variant}`;
+    try {
+      const readmeResponse = await fetchRepoContents(config, readmeUrl, repo);
+      const readmeContent = await readmeResponse.json();
+
+      if (readmeContent) {
+        return await mapFileToItem(config, {
+          ...readmeContent,
+          name: variant,
+          path: `${dirPath}/${variant}`
+        }, owner, repoName);
+      }
+    } catch (error) {
+      config.context.log(`No ${variant} found in ${dirPath}: ${error.message}`);
+      continue; // Try next variant
+    }
+  }
+
+  config.context.log(`No readme file found in ${dirPath} after trying all variants`);
+  return null;
+}
 
 export async function* getAllMdFiles(config: Config): AsyncGenerator<Item> {
   const repos = config.connector.repos.split(",");
-  
+
   for (const repo of repos) {
     config.context.log(`Fetching readme.md files from agent-instructions folders: ${repo}`);
     const [owner, repoName] = repo.trim().split("/");
-    
+
     const fetchUrl = `https://api.github.com/repos/${repo}/contents/samples/agent-instructions`;
-    
+
     try {
       const response = await fetchRepoContents(config, fetchUrl, repo);
       const contents = await response.json();
-      
+
       // Process files and directories recursively
       async function* processContents(items: any[]): AsyncGenerator<Item> {
         try {
@@ -96,38 +121,18 @@ export async function* getAllMdFiles(config: Config): AsyncGenerator<Item> {
 
           for (const dir of directories) {
             try {
-              // Fetch readme.md directly from each agent folder
-               const readmeUrl = `https://api.github.com/repos/${repo}/contents/${dir.path}/readme.md`;
-         try {
-                const readmeResponse = await fetchRepoContents(config, readmeUrl, repo);
-                const readmeContent = await readmeResponse.json();
-                
-                if (readmeContent) {
-                  yield await mapFileToItem(config, {
-                    ...readmeContent,
-                    name: 'readme.md',
-                    path: `${dir.path}/readme.md`
-                  }, owner, repoName);
-                }
-              } catch (readmeError) {
-                 config.context.log(`No readme found in ${dir.path} with issue 1: ${readmeError.message}`);
-                // Try with uppercase README.md if lowercase fails
-               const uppercaseReadmeUrl = `https://api.github.com/repos/${repo}/contents/${dir.path}/README.md`;
-             try {
-                  const readmeResponse = await fetchRepoContents(config, uppercaseReadmeUrl, repo);
-                  const readmeContent = await readmeResponse.json();
-                  
-                  if (readmeContent) {
-                    yield await mapFileToItem(config, {
-                      ...readmeContent,
-                      name: 'README.md',
-                      path: `${dir.path}/README.md`
-                    }, owner, repoName);
+              for (const dir of directories) {
+                try {
+                  const readmeItem = await tryFetchReadme(config, repo, dir.path, owner, repoName);
+                  if (readmeItem) {
+                    yield readmeItem;
                   }
-                } catch (uppercaseReadmeError) {
-                  config.context.log(`No readme found in ${dir.path} with issue: ${uppercaseReadmeError.message}`);
+                } catch (dirError) {
+                  config.context.log(`Error processing folder ${dir.path}: ${dirError.message}`);
+                  continue;
                 }
               }
+
             } catch (dirError) {
               config.context.log(`Error processing folder ${dir.path}: ${dirError.message}`);
               continue;
